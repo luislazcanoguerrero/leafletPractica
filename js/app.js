@@ -44,18 +44,23 @@ const irTo = function (lat, log) {
 
 //6. add geojson layer
 const geoJsonUrl = 'data/Regional.geojson'
+var opa = 0;
 
 // aqui cargo el geojson pero no parece ocurrir nada
+// Vario la opacidad por cada feature
 fetch(geoJsonUrl)
     .then(response => response.json())
     .then(data => {
         L.geoJSON(data, {
             style: function (feature) {
                 const {codregion} = feature.properties
+                opa = opa + 0.1
+                if (opa > 1) {opa = 0}
                 return {
-                  opacity: 0.8,
-                  fillColor: colores[codregion],
-                  fillOpacity: 0.5
+                  opacity: 0.8,   // controla la opacidad del borde 
+                  stroke:true,   // Elimina los bordes
+                  fillColor: colores[codregion], // Establece el color de relleno del feature
+                  fillOpacity: opa // controla el nivel de opacidad ( 0 a 1) del relleno del feature
                 };
             },
             onEachFeature: muestraFeatureDatos
@@ -66,6 +71,11 @@ fetch(geoJsonUrl)
     })
 
 function muestraFeatureDatos(feature, layer) {
+    layer.on('click', function(e) {
+        var clickedMarker = e.target;
+        var opaci = (e.target.options.fillOpacity > 1) ? 0 : e.target.options.fillOpacity + 0.2
+        clickedMarker.setStyle({fillOpacity: opaci });
+    })
     if (feature.properties) {
         layer.bindPopup(`Region: ${feature.properties.Region}  Area: ${feature.properties.area_km} km2 `);
     }
