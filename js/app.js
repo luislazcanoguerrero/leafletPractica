@@ -1,7 +1,9 @@
 
 const ira = document.querySelector("#ira")
 const centrar = document.querySelector("#centrar")
-const colores = ["#3A7FF2","#E94B4B","#4AE2A2","#F5C93C","#9B59D1","#FF7E3B","#2DC7E8","#67E94F","#F25DA8","#BFAE3A","'#1E9B7A","'#C84FF0","'#FFB84A","'#2F46E2","'#E23D6E","'#4BE0F9","'#A6E94B"]
+const colores = ["#3A7FF2", "#E94B4B", "#4AE2A2", "#F5C93C", "#9B59D1", "#FF7E3B", "#2DC7E8", "#67E94F", "#F25DA8", "#BFAE3A", "'#1E9B7A", "'#C84FF0", "'#FFB84A", "'#2F46E2", "'#E23D6E", "'#4BE0F9", "'#A6E94B"]
+
+const grupoBotones = document.querySelector("#grupoBotones")
 
 ira.addEventListener('click', () => {
     irTo(-18.47552, -70.30058)
@@ -23,9 +25,10 @@ let map = L.map('map', {
 
 
 //2.- Añadir una cartografía base
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', 
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
     {
-        minZoom: 0,maxZoom: 20,id: 'mapbox.streets'}).addTo(map);
+        minZoom: 0, maxZoom: 20, id: 'mapbox.streets'
+    }).addTo(map);
 
 
 //3.- Añadiendo una escala
@@ -39,11 +42,13 @@ L.control.scale().addTo(map);
 //marker.addTo(map)
 
 const irTo = function (lat, log) {
-    map.flyTo([lat, log])
+    console.log('ir a')
+    map.flyTo([lat, log],8)
 }
 
 //6. add geojson layer
 const geoJsonUrl = 'data/Regional.geojson'
+const regiones = [];
 var opa = 0;
 
 // aqui cargo el geojson pero no parece ocurrir nada
@@ -53,14 +58,13 @@ fetch(geoJsonUrl)
     .then(data => {
         L.geoJSON(data, {
             style: function (feature) {
-                const {codregion} = feature.properties
-                opa = opa + 0.1
-                if (opa > 1) {opa = 0}
+                const { codregion } = feature.properties
+                regiones.push(feature);
                 return {
-                  opacity: 0.8,   // controla la opacidad del borde 
-                  stroke:true,   // Elimina los bordes
-                  fillColor: colores[codregion], // Establece el color de relleno del feature
-                  fillOpacity: opa // controla el nivel de opacidad ( 0 a 1) del relleno del feature
+                    opacity: 0.8,   // controla la opacidad del borde 
+                    stroke: true,   // Elimina los bordes
+                    fillColor: colores[codregion], // Establece el color de relleno del feature
+                    fillOpacity: 0.4 // controla el nivel de opacidad ( 0 a 1) del relleno del feature
                 };
             },
             onEachFeature: muestraFeatureDatos
@@ -71,10 +75,37 @@ fetch(geoJsonUrl)
     })
 
 function muestraFeatureDatos(feature, layer) {
-    layer.on('click', function(e) {
+
+    const { Region, codregion } = layer.feature.properties
+    const nuevoBoton = document.createElement('button')
+    nuevoBoton.className = 'btn btn-light btn-sm m-1'      // Para agregar multiples clases
+    nuevoBoton.textContent = Region                        // Establecer el título del boton
+    grupoBotones.appendChild(nuevoBoton)                   // Agregar el elemento al pabre 
+    nuevoBoton.id = codregion;
+
+    nuevoBoton.addEventListener('click', (e) => {
+        const idRegion = parseInt(e.target.id);
+        const { codregion } = regiones[idRegion].properties
+        const regionEncontrada = regiones.find(element => element.properties.codregion == idRegion)
+        const poligono = L.polygon(regionEncontrada.geometry.coordinates[0])
+        if (regionEncontrada) {
+            const polygonBounds = poligono.getBounds();
+            const polygonCenter = polygonBounds.getCenter();
+            const {lat,lng} = polygonCenter
+            irTo(lng, lat)
+        }
+    })
+
+
+    function getfeature(id) {
+
+
+    }
+
+    layer.on('click', function (e) {
         var clickedMarker = e.target;
         var opaci = (e.target.options.fillOpacity > 1) ? 0 : e.target.options.fillOpacity + 0.2
-        clickedMarker.setStyle({fillOpacity: opaci });
+        clickedMarker.setStyle({ fillOpacity: opaci });
     })
     if (feature.properties) {
         layer.bindPopup(`Region: ${feature.properties.Region}  Area: ${feature.properties.area_km} km2 `);
