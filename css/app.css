@@ -3,3 +3,8 @@
    height: 1080px; 
    box-shadow: 5px 5px 5px #888; 
  } 
+
+ .accordion-small .accordion-button {
+  padding: 0.5rem 0.75rem; /* Smaller padding for the button */
+  font-size: 0.5rem; /* Smaller font size for the button text */
+}

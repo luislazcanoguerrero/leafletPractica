@@ -3,7 +3,7 @@ const ira = document.querySelector("#ira")
 const centrar = document.querySelector("#centrar")
 const colores = ["#3A7FF2", "#E94B4B", "#4AE2A2", "#F5C93C", "#9B59D1", "#FF7E3B", "#2DC7E8", "#67E94F", "#F25DA8", "#BFAE3A", "'#1E9B7A", "'#C84FF0", "'#FFB84A", "'#2F46E2", "'#E23D6E", "'#4BE0F9", "'#A6E94B"]
 
-const grupoBotones = document.querySelector("#grupoBotones")
+const regionesMenu = document.querySelector('#regionesMenu')
 
 ira.addEventListener('click', () => {
     irTo(-18.47552, -70.30058)
@@ -77,29 +77,57 @@ fetch(geoJsonUrl)
 function muestraFeatureDatos(feature, layer) {
 
     const { Region, codregion } = layer.feature.properties
-    const nuevoBoton = document.createElement('button')
-    nuevoBoton.className = 'btn btn-light btn-sm m-1'      // Para agregar multiples clases
-    nuevoBoton.textContent = Region                        // Establecer el título del boton
-    grupoBotones.appendChild(nuevoBoton)                   // Agregar el elemento al pabre 
-    nuevoBoton.id = codregion;
 
-    nuevoBoton.addEventListener('click', (e) => {
-        const idRegion = parseInt(e.target.id);
-        const { codregion } = regiones[idRegion].properties
-        const regionEncontrada = regiones.find(element => element.properties.codregion == idRegion)
-        const poligono = L.polygon(regionEncontrada.geometry.coordinates[0])
-        if (regionEncontrada) {
-            const polygonBounds = poligono.getBounds();
-            const polygonCenter = polygonBounds.getCenter();
-            const {lat,lng} = polygonCenter
-            irTo(lng, lat)
-        }
-    })
+    // const nuevoBoton = document.createElement('button')
+    // nuevoBoton.className = 'btn btn-light btn-sm m-1'      // Para agregar multiples clases
+    // nuevoBoton.textContent = Region                        // Establecer el título del boton
+    // grupoBotones.appendChild(nuevoBoton)                   // Agregar el elemento al pabre 
+    // nuevoBoton.id = codregion;
 
+    const item = document.createElement('div')
+    const titulo = document.createElement('h6')
+    const boton = document.createElement('button')
+    item.className = 'accordion-item'
+    titulo.className = 'accordion-header'
+    titulo.id = `headingOne${codregion}`
+    
+    boton.className = 'accordion-button text-dark'
+    boton.setAttribute('type', 'button');
+    boton.setAttribute('data-bs-toggle', 'collapse');
+    boton.setAttribute('data-bs-target', `#collapse${codregion}`);
+    boton.setAttribute('aria-expanded', true);
+    boton.setAttribute('aria-controls', `collapse${codregion}`);
+    boton.innerHTML = `<small class='text-danger'>  ${Region} </small>`
+    titulo.appendChild(boton)
+    item.appendChild(titulo)
+
+    const cuerpo = document.createElement('div')
+    cuerpo.id = `collapse${codregion}`
+    cuerpo.className = 'accordion-collapse collapse'
+
+    cuerpo.setAttribute('aria-labelledby', `heading${codregion}`)
+    cuerpo.setAttribute('data-bs-parent', '#regionesMenu');
+    
+    const cuerpoDetalle = document.createElement('div')
+    const slider = document.createElement('input')
+    slider.className= 'form-range'
+    slider.setAttribute('type','range')
+    slider.setAttribute('min',0)
+    slider.setAttribute('max',1)
+    slider.setAttribute('step',0.1)
+    slider.setAttribute('value',0)
+    slider.setAttribute('id',`slider${codregion}`)
+
+    cuerpoDetalle.className = 'accordion-body'
+    cuerpoDetalle.innerHTML = "<small> Opacity </small>"
+    cuerpoDetalle.appendChild(slider)
+    cuerpo.appendChild(cuerpoDetalle)
+    item.appendChild(cuerpo)
+    regionesMenu.appendChild(item)
+
+    //console.log(document.getElementById("regionesMenu"))
 
     function getfeature(id) {
-
-
     }
 
     layer.on('click', function (e) {
