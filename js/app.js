@@ -109,6 +109,8 @@ function muestraFeatureDatos(feature, layer) {
     cuerpo.setAttribute('data-bs-parent', '#regionesMenu');
     
     const cuerpoDetalle = document.createElement('div')
+    
+    // Creando el slider para controlar la opacidad
     const slider = document.createElement('input')
     slider.className= 'form-range'
     slider.setAttribute('type','range')
@@ -116,11 +118,21 @@ function muestraFeatureDatos(feature, layer) {
     slider.setAttribute('max',1)
     slider.setAttribute('step',0.1)
     slider.setAttribute('value',0)
+    slider.setAttribute('regionId',`${codregion}`)
     slider.setAttribute('id',`slider${codregion}`)
 
     cuerpoDetalle.className = 'accordion-body'
     cuerpoDetalle.innerHTML = "<small> Opacity </small>"
     cuerpoDetalle.appendChild(slider)
+
+    slider.addEventListener('change', (e) => {
+        const regionId = e.target.id
+        xx = document.getElementById(regionId)
+        //xx.setStyle({ fillOpacity: 1 });
+        console.log(xx.options)
+    })
+
+
     cuerpo.appendChild(cuerpoDetalle)
     item.appendChild(cuerpo)
     regionesMenu.appendChild(item)
