@@ -6,14 +6,15 @@ const colores = ["#3A7FF2", "#E94B4B", "#4AE2A2", "#F5C93C", "#9B59D1", "#FF7E3B
 const regionesMenu = document.querySelector('#regionesMenu')
 
 ira.addEventListener('click', () => {
-    irTo(-18.47552, -70.30058)
+    map.eachLayer( function(layer) {
+        console.log(layer)
+    
+    })
 })
-
 
 centrar.addEventListener('click', () => {
     irTo(-33.45694, -70.64827)
 })
-
 
 //L.map es la clase central de la API. Se usa para crear y manipular el mapa. 
 // En el mapa establecemos unas coordeanas de la vista y un nivel de zoom.
@@ -59,7 +60,7 @@ fetch(geoJsonUrl)
         L.geoJSON(data, {
             style: function (feature) {
                 const { codregion } = feature.properties
-                regiones.push(feature);
+                regiones[codregion] = feature
                 return {
                     opacity: 0.8,   // controla la opacidad del borde 
                     stroke: true,   // Elimina los bordes
@@ -67,6 +68,7 @@ fetch(geoJsonUrl)
                     fillOpacity: 0.4 // controla el nivel de opacidad ( 0 a 1) del relleno del feature
                 };
             },
+
             onEachFeature: muestraFeatureDatos
         }).addTo(map)
     })
@@ -118,18 +120,20 @@ function muestraFeatureDatos(feature, layer) {
     slider.setAttribute('max',1)
     slider.setAttribute('step',0.1)
     slider.setAttribute('value',0)
-    slider.setAttribute('regionId',`${codregion}`)
+    slider.setAttribute('numero',`${codregion}`)
     slider.setAttribute('id',`slider${codregion}`)
 
     cuerpoDetalle.className = 'accordion-body'
     cuerpoDetalle.innerHTML = "<small> Opacity </small>"
     cuerpoDetalle.appendChild(slider)
 
-    slider.addEventListener('change', (e) => {
+    slider.addEventListener('change', (e,feature) => {
         const regionId = e.target.id
-        xx = document.getElementById(regionId)
-        //xx.setStyle({ fillOpacity: 1 });
-        console.log(xx.options)
+        const elemento = document.getElementById(regionId)
+        const numero = elemento.getAttribute('numero')
+        //console.log(elemento.getAttribute('numero')) // funciona
+        //console.log(regiones[elemento.getAttribute('numero')])
+        
     })
 
 
@@ -137,16 +141,19 @@ function muestraFeatureDatos(feature, layer) {
     item.appendChild(cuerpo)
     regionesMenu.appendChild(item)
 
-    //console.log(document.getElementById("regionesMenu"))
 
     function getfeature(id) {
     }
 
     layer.on('click', function (e) {
         var clickedMarker = e.target;
-        var opaci = (e.target.options.fillOpacity > 1) ? 0 : e.target.options.fillOpacity + 0.2
-        clickedMarker.setStyle({ fillOpacity: opaci });
+        console.log(e)
+
+        // var opaci = (e.target.options.fillOpacity > 1) ? 0 : e.target.options.fillOpacity + 0.2
+        // clickedMarker.setStyle({ fillOpacity: opaci });
     })
+
+
     if (feature.properties) {
         layer.bindPopup(`Region: ${feature.properties.Region}  Area: ${feature.properties.area_km} km2 `);
     }
